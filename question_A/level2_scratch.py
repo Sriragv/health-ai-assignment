@@ -28,7 +28,7 @@ def log_loss(y, p):
     return -np.mean(y * np.log(p) + (1 - y) * np.log(1 - p))
 
 
-def train_logreg(X, y, lr=0.01, epochs=5000, seed=S):
+def train_logreg(X, y, lr=0.1, epochs=5000, seed=S):
     rng = np.random.default_rng(seed)
     w = rng.normal(0, 0.01, X.shape[1])
     b = 0.0
