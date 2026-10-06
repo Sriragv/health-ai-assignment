@@ -8,7 +8,7 @@
     label { display: flex; justify-content: space-between; margin: 6px 0; }
     input { width: 120px; }
     button { margin-top: 12px; padding: 8px 16px; cursor: pointer; }
-    #result { margin-top: 16px; padding: 12px; border-radius: 6px; font-size: 18px; }
+    #result { margin-top: 16px; padding: 12px; border-radius: 6px; font-size: 18px; white-space: pre-line; }
     .Low { background: #d4edda; } .Moderate { background: #fff3cd; } .High { background: #f8d7da; }
     .error { background: #eee; color: #a00; }
   </style>
@@ -44,8 +44,11 @@ async function predict() {
     out.className = data.risk_level;
     out.textContent = data.message + " (" + data.note + ")";
   } else {
-    out.className = "error";
-    out.textContent = "Error: " + data.detail;
+       out.className = "error";
+    const errs = Array.isArray(data.detail)
+      ? data.detail.map(e => `${e.loc[e.loc.length - 1]}: ${e.msg}`).join("\n")
+      : data.detail;
+    out.textContent = "Please fix:\n" + errs;
   }
 }
 

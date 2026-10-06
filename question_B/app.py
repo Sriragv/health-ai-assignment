@@ -9,7 +9,7 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -21,7 +21,11 @@ THRESHOLD = 0.25  # chosen in Question A Level 3 (recall 0.926)
 FEATURES = ["Pregnancies", "Glucose", "BloodPressure", "SkinThickness",
             "Insulin", "BMI", "DiabetesPedigreeFunction", "Age"]
 
-model = joblib.load(MODEL_PATH)
+try:
+    model = joblib.load(MODEL_PATH)
+except FileNotFoundError:
+    model = None
+    print(f"WARNING: model file not found at {MODEL_PATH}. /predict will return 503.")
 
 app = FastAPI(title="Diabetes Risk API")
 
@@ -81,6 +85,8 @@ def home():
 
 @app.post("/predict")
 def predict(patient: PatientInput):
+    if model is None:
+        raise HTTPException(status_code=503, detail="The risk model is not available right now. Please try again later.")
     row = pd.DataFrame([patient.model_dump()])[FEATURES]
     prob = float(model.predict_proba(row)[0, 1])
     level, message = risk_text(prob)
